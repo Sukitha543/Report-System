@@ -1,0 +1,82 @@
+# Report System
+
+## Tech Stack
+- **Frontend**: React, TypeScript, Vite
+- **Backend**: Node.js, Express, TypeScript, MongoDB (Mongoose)
+
+## Folder Structure
+
+### Frontend
+```text
+frontend/
+├── public/             # Public assets
+├── src/
+│   ├── assets/         # Static assets like images
+│   ├── App.css         # App specific styles
+│   ├── App.tsx         # Main application component
+│   ├── index.css       # Global styles
+│   └── main.tsx        # Application entry point
+├── .env                # Environment variables
+├── eslint.config.js    # ESLint configuration
+├── package.json        # Frontend dependencies and scripts
+├── tsconfig.json       # TypeScript configuration
+└── vite.config.ts      # Vite configuration
+```
+
+### Backend
+```text
+backend/
+├── src/
+│   ├── config/         # Configuration files (e.g., database connection)
+│   └── server.ts       # Backend entry point
+├── .env                # Environment variables
+├── package.json        # Backend dependencies and scripts
+└── tsconfig.json       # TypeScript configuration
+```
+
+## Prerequisites
+Before you begin, ensure you have met the following requirements:
+- **Node.js**: v18.0.0 or newer
+- **npm**: Node Package Manager (comes with Node.js)
+- **MongoDB**: A running local MongoDB instance or a remote MongoDB URI (e.g., MongoDB Atlas).
+
+## How to Install
+
+1. Clone the repository to your local machine.
+
+2. Install dependencies for the frontend:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+3. Install dependencies for the backend:
+   ```bash
+   cd backend
+   npm install
+   ```
+
+## How to Run the Frontend
+
+1. Open a new terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Start the frontend development server:
+   ```bash
+   npm run dev
+   ```
+3. The frontend should now be running (usually on `http://localhost:5173`).
+
+## How to Run the Backend
+
+1. Open a new terminal and navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Make sure you have your `.env` file configured in the backend folder with the necessary variables (e.g., MongoDB URI, Port).
+3. Start the backend development server:
+   ```bash
+   npm run dev
+   ```
+4. The backend should now be running.
