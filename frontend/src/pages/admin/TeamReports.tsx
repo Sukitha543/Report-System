@@ -63,8 +63,7 @@ const TeamReports = () => {
   const [filters, setFilters] = useState({
     employeeId: 'all',
     projectId: 'all',
-    startWeek: '',
-    endWeek: ''
+    week: ''
   });
 
   // Fetch initial data
@@ -105,8 +104,10 @@ const TeamReports = () => {
       const params = new URLSearchParams();
       if (filters.employeeId !== 'all') params.append('employeeId', filters.employeeId);
       if (filters.projectId !== 'all') params.append('projectId', filters.projectId);
-      if (filters.startWeek) params.append('startWeek', filters.startWeek);
-      if (filters.endWeek) params.append('endWeek', filters.endWeek);
+      if (filters.week) {
+        params.append('startWeek', filters.week);
+        params.append('endWeek', filters.week);
+      }
 
       const res = await axios.get(`/admin/reports?${params.toString()}`);
       setReports(res.data);
@@ -236,7 +237,7 @@ const TeamReports = () => {
               <h3 className="font-medium">Filter Reports</h3>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Employee</label>
                 <select
@@ -268,22 +269,12 @@ const TeamReports = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Start Week</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Week</label>
                 <input
                   type="week"
                   className="w-full p-2 border border-gray-300 rounded-lg text-sm bg-white"
-                  value={filters.startWeek}
-                  onChange={(e) => setFilters({...filters, startWeek: e.target.value})}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">End Week</label>
-                <input
-                  type="week"
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm bg-white"
-                  value={filters.endWeek}
-                  onChange={(e) => setFilters({...filters, endWeek: e.target.value})}
+                  value={filters.week}
+                  onChange={(e) => setFilters({...filters, week: e.target.value})}
                 />
               </div>
             </div>
