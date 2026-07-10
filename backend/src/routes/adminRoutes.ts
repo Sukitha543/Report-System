@@ -2,6 +2,7 @@ import express from 'express';
 import { createEmployee, getEmployees } from '../controllers/adminController.js';
 import { createProject, getProjects, updateProject, deleteProject } from '../controllers/projectController.js';
 import { getReports, getTeamStatus } from '../controllers/adminReportController.js';
+import { getDashboardStats } from '../controllers/adminDashboardController.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.route('/projects/:id')
 
 router.get('/reports', getReports);
 router.get('/reports/team-status', getTeamStatus);
+router.get('/dashboard-stats', getDashboardStats);
 
 export default router;

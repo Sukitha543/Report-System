@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Users, PlusCircle } from 'lucide-react';
 
-const AdminDashboard = () => {
+const ManageEmployees = () => {
   const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -174,4 +174,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default ManageEmployees;

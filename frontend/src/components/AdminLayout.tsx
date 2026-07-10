@@ -24,6 +24,14 @@ const AdminLayout = () => {
                   `transition-colors ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-gray-200'}`
                 }
               >
+                Dashboard
+              </NavLink>
+              <NavLink 
+                to="/admin/employees" 
+                className={({ isActive }) => 
+                  `transition-colors ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-gray-200'}`
+                }
+              >
                 Team Members
               </NavLink>
               <NavLink 

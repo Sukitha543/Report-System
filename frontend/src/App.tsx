@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Login from './pages/Login';
 import EmployeeRegister from './pages/EmployeeRegister';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 
 import AdminLayout from './components/AdminLayout';
@@ -13,6 +12,8 @@ import EmployeeReports from './pages/employee/EmployeeReports';
 import ManageProjects from './pages/admin/ManageProjects';
 import TeamReports from './pages/admin/TeamReports';
 import ViewEmployeeReports from './pages/admin/ViewEmployeeReports';
+import Dashboard from './pages/admin/Dashboard';
+import ManageEmployees from './pages/admin/ManageEmployees';
 
 const ProtectedRoute = ({ children, allowedRole }: { children: ReactNode, allowedRole: 'admin' | 'employee' }) => {
   const { user, loading } = useAuth();
@@ -46,7 +47,8 @@ const App = () => {
               </ProtectedRoute>
             }
           >
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<Dashboard />} />
+            <Route path="employees" element={<ManageEmployees />} />
             <Route path="projects" element={<ManageProjects />} />
             <Route path="reports" element={<TeamReports />} />
             <Route path="reports/employee/:employeeId" element={<ViewEmployeeReports />} />
