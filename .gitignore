@@ -39,10 +39,7 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules
-dist
-.env
-seed.ts
+node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -124,4 +121,6 @@ dist
 
 # Mac OS
 .DS_Store
-.seed.ts
+
+# Seed script
+backend/src/seed.ts
