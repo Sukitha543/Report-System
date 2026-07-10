@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { Project, Admin, ProjectAssignment } from '../models/index.js';
+import { Project, Admin, ProjectAssignment, Report } from '../models/index.js';
 
 export const createProject = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -111,6 +111,9 @@ export const deleteProject = async (req: Request, res: Response): Promise<void> 
 
     // Clean up assignments
     await ProjectAssignment.deleteMany({ project: id as string });
+
+    // Clean up reports associated with the project
+    await Report.deleteMany({ project: id as string });
 
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
