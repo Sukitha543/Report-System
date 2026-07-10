@@ -23,3 +23,11 @@ export const adminOnly = (req: Request, res: Response, next: NextFunction) => {
     res.status(403).json({ message: 'Not authorized as admin' });
   }
 };
+
+export const employeeOnly = (req: Request, res: Response, next: NextFunction) => {
+  if (req.session && req.session.role === 'employee') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Not authorized as employee' });
+  }
+};

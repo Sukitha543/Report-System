@@ -7,6 +7,11 @@ import EmployeeRegister from './pages/EmployeeRegister';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 
+import AdminLayout from './components/AdminLayout';
+import EmployeeLayout from './components/EmployeeLayout';
+import EmployeeReports from './pages/employee/EmployeeReports';
+import ManageProjects from './pages/admin/ManageProjects';
+
 const ProtectedRoute = ({ children, allowedRole }: { children: ReactNode, allowedRole: 'admin' | 'employee' }) => {
   const { user, loading } = useAuth();
 
@@ -30,24 +35,30 @@ const App = () => {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<EmployeeRegister />} />
-          
-          <Route 
-            path="/admin/*" 
+
+          <Route
+            path="/admin"
             element={
               <ProtectedRoute allowedRole="admin">
-                <AdminDashboard />
+                <AdminLayout />
               </ProtectedRoute>
-            } 
-          />
-          
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="projects" element={<ManageProjects />} />
+          </Route>
+
           <Route 
-            path="/employee/*" 
+            path="/employee" 
             element={
               <ProtectedRoute allowedRole="employee">
-                <EmployeeDashboard />
+                <EmployeeLayout />
               </ProtectedRoute>
             } 
-          />
+          >
+            <Route index element={<EmployeeDashboard />} />
+            <Route path="reports" element={<EmployeeReports />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
