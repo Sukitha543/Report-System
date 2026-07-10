@@ -41,8 +41,8 @@ const ManageEmployees = () => {
   };
 
   return (
-    <main className="max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
-      
+    <main className="w-full grid grid-cols-1 lg:grid-cols-3 gap-2">
+
       {/* Left Column: Add Employee Form */}
       <div className="lg:col-span-1">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
@@ -50,7 +50,7 @@ const ManageEmployees = () => {
             <PlusCircle className="h-5 w-5 text-gray-700" />
             <h2 className="text-lg font-semibold text-gray-900">Add New Employee</h2>
           </div>
-          
+
           {message && (
             <div className={`mb-4 p-3 rounded-lg text-sm ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
               {message}
@@ -66,7 +66,7 @@ const ManageEmployees = () => {
                   type="text"
                   className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black transition-colors"
                   value={formData.firstName}
-                  onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 />
               </div>
               <div>
@@ -76,7 +76,7 @@ const ManageEmployees = () => {
                   type="text"
                   className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black transition-colors"
                   value={formData.lastName}
-                  onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 />
               </div>
             </div>
@@ -87,7 +87,7 @@ const ManageEmployees = () => {
                 type="text"
                 className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black transition-colors"
                 value={formData.contactNumber}
-                onChange={(e) => setFormData({...formData, contactNumber: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
               />
             </div>
 
@@ -97,13 +97,13 @@ const ManageEmployees = () => {
                 className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black transition-colors"
                 rows={3}
                 value={formData.address}
-                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-black text-white p-3 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-2"
+              className="w-full bg-emerald-500 text-white p-3 rounded-lg font-medium hover:bg-emerald-600 transition-colors mt-2"
             >
               Create Profile
             </button>
@@ -115,7 +115,7 @@ const ManageEmployees = () => {
       <div className="lg:col-span-2">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-8">
               <Users className="h-5 w-5 text-gray-700" />
               <h2 className="text-lg font-semibold text-gray-900">Team Members</h2>
             </div>
@@ -123,7 +123,7 @@ const ManageEmployees = () => {
               {employees.length} Total
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-600">
@@ -139,7 +139,7 @@ const ManageEmployees = () => {
                 {employees.map((emp: any) => (
                   <tr key={emp._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-purple-700 bg-purple-100 rounded">
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-blue-700 bg-blue-100 rounded">
                         {emp.employeeID}
                       </span>
                     </td>

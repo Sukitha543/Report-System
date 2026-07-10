@@ -19,7 +19,7 @@ interface DashboardStats {
   recentActivity: any[];
 }
 
-const COLORS = ['#000000', '#4B5563', '#9CA3AF', '#D1D5DB', '#F3F4F6'];
+const COLORS = ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE'];
 
 const Dashboard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -48,7 +48,7 @@ const Dashboard = () => {
   }
 
   return (
-    <main className="max-w-7xl w-full mx-auto p-6 mt-6 space-y-8">
+    <main className="w-full space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

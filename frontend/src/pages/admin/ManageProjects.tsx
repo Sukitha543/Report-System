@@ -109,7 +109,7 @@ const ManageProjects = () => {
   };
 
   return (
-    <main className="max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+    <main className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
       
       {/* Left Column: Add/Edit Project Form */}
       <div className="lg:col-span-1">
@@ -182,7 +182,7 @@ const ManageProjects = () => {
             <button
               type="submit"
               className={`w-full text-white p-3 rounded-lg font-medium transition-colors mt-4 ${
-                editingId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800'
+                editingId ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-emerald-500 hover:bg-emerald-600'
               }`}
             >
               {editingId ? 'Update Project' : 'Create Project'}

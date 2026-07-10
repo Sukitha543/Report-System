@@ -138,7 +138,7 @@ const TeamReports = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto w-full p-6 mt-6">
+    <div className="w-full">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Users className="h-6 w-6 text-blue-600" />
@@ -164,8 +164,8 @@ const TeamReports = () => {
       </div>
 
       {activeTab === 'tracker' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+        <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+          <div className="p-6 border-b border-blue-100 bg-blue-50/50 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-900">Submission Status</h2>
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-gray-700">Select Week:</label>
@@ -181,7 +181,7 @@ const TeamReports = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-200">
+                <tr className="bg-blue-50 text-blue-800 text-sm border-b border-blue-100">
                   <th className="p-4 font-medium">Employee</th>
                   <th className="p-4 font-medium">Project</th>
                   <th className="p-4 font-medium">Status</th>
@@ -229,8 +229,8 @@ const TeamReports = () => {
       {activeTab === 'search' && (
         <div className="space-y-6">
           {/* Filters */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-2 mb-4 text-gray-700">
+          <div className="bg-blue-50/30 rounded-2xl shadow-sm border border-blue-100 p-6">
+            <div className="flex items-center gap-2 mb-4 text-blue-800">
               <Filter className="h-4 w-4" />
               <h3 className="font-medium">Filter Reports</h3>
             </div>
@@ -280,7 +280,7 @@ const TeamReports = () => {
             <div className="mt-4 flex justify-end">
               <button
                 onClick={handleSearch}
-                className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                className="bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-600 transition-colors"
               >
                 Search Reports
               </button>
@@ -288,9 +288,9 @@ const TeamReports = () => {
           </div>
 
           {/* Results list */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-900">Search Results</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+            <div className="p-6 border-b border-blue-100 flex justify-between items-center bg-blue-50/50">
+              <h2 className="text-lg font-semibold text-blue-900">Search Results</h2>
               <span className="text-sm text-gray-500">{reports.length} reports found</span>
             </div>
             
@@ -303,7 +303,7 @@ const TeamReports = () => {
                   >
                     <div className="flex gap-6 items-center">
                       <div className="w-24">
-                        <span className="text-sm font-semibold text-gray-900">{report.week}</span>
+                        <span className="inline-flex items-center justify-center px-3 py-1 text-xs font-bold leading-none text-purple-700 bg-purple-100 rounded-full">{report.week}</span>
                       </div>
                       <div>
                         <div className="font-medium text-gray-900">
@@ -329,33 +329,33 @@ const TeamReports = () => {
                   </div>
                   
                   {expandedReport === report._id && (
-                    <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 rounded-xl shadow-inner border border-gray-100">
-                      <div>
-                        <div className="mb-4">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1">
-                            <FileText className="h-3 w-3" /> Completed Tasks
+                    <div className="mt-6 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900 p-6 rounded-xl border-t border-slate-800 shadow-inner">
+                      <div className="space-y-6">
+                        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3 flex items-center gap-1">
+                            <FileText className="h-4 w-4" /> Completed Tasks
                           </h4>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{report.completedTasks}</p>
+                          <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{report.completedTasks}</p>
                         </div>
-                        <div>
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Blockers</h4>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{report.blockers || 'None reported'}</p>
+                        <div className="bg-red-50 p-5 rounded-xl border border-red-100 shadow-sm text-red-900">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-red-700 mb-3">Blockers</h4>
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{report.blockers || 'None reported'}</p>
                         </div>
                       </div>
                       
-                      <div>
-                        <div className="mb-4">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Planned for Next Week</h4>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{report.plannedTasks}</p>
+                      <div className="space-y-6">
+                        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-3">Planned for Next Week</h4>
+                          <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{report.plannedTasks}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Hours Worked</h4>
-                            <p className="text-sm font-medium text-blue-600">{report.hoursWorked || 'N/A'}</p>
+                          <div className="bg-blue-50 p-5 rounded-xl border border-blue-100 shadow-sm">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-blue-700 mb-2">Hours</h4>
+                            <p className="text-lg font-bold text-blue-600">{report.hoursWorked || 'N/A'}</p>
                           </div>
-                          <div>
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Notes</h4>
-                            <p className="text-sm text-gray-700 truncate" title={report.notes}>{report.notes || 'None'}</p>
+                          <div className="bg-amber-50 p-5 rounded-xl border border-amber-100 shadow-sm">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-2">Notes</h4>
+                            <p className="text-sm text-amber-900 truncate" title={report.notes}>{report.notes || 'None'}</p>
                           </div>
                         </div>
                       </div>
