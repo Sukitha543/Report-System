@@ -24,15 +24,15 @@ const EmployeeLayout = () => {
                   `transition-colors ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-gray-200'}`
                 }
               >
-                Dashboard
+                My Reports
               </NavLink>
               <NavLink 
-                to="/employee/reports" 
+                to="/employee/submit" 
                 className={({ isActive }) => 
                   `transition-colors ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-gray-200'}`
                 }
               >
-                My Reports
+                Submit Report
               </NavLink>
             </div>
           </div>

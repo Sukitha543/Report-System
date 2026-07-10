@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Login from './pages/Login';
 import EmployeeRegister from './pages/EmployeeRegister';
-import EmployeeDashboard from './pages/employee/EmployeeDashboard';
+import SubmitReport from './pages/employee/SubmitReport';
 
 import AdminLayout from './components/AdminLayout';
 import EmployeeLayout from './components/EmployeeLayout';
@@ -62,8 +62,8 @@ const App = () => {
               </ProtectedRoute>
             }
           >
-            <Route index element={<EmployeeDashboard />} />
-            <Route path="reports" element={<EmployeeReports />} />
+            <Route index element={<EmployeeReports />} />
+            <Route path="submit" element={<SubmitReport />} />
           </Route>
         </Routes>
       </BrowserRouter>

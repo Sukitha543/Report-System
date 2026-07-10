@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FileText, Save, Send, Edit2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Edit2, FileText, X } from 'lucide-react';
 
 interface Project {
   _id: string;
@@ -21,344 +22,238 @@ interface Report {
 }
 
 const EmployeeReports = () => {
+  const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'submitted'>('all');
   const [filterProject, setFilterProject] = useState<string>('all');
-  
-  const [formData, setFormData] = useState<Partial<Report>>({
-    week: '',
-    project: '',
-    completedTasks: '',
-    plannedTasks: '',
-    blockers: '',
-    hoursWorked: '',
-    notes: ''
-  });
-  
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [message, setMessage] = useState('');
-
-  const fetchData = async () => {
-    try {
-      const [reportsRes, projectsRes] = await Promise.all([
-        axios.get('/employees/reports'),
-        axios.get('/employees/projects')
-      ]);
-      setReports(reportsRes.data);
-      setProjects(projectsRes.data);
-    } catch {
-      console.error('Failed to fetch data');
-    }
-  };
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const fetchData = async () => {
+      try {
+        const [reportsRes, projectsRes] = await Promise.all([
+          axios.get('/employees/reports'),
+          axios.get('/employees/projects')
+        ]);
+        setReports(reportsRes.data);
+        setProjects(projectsRes.data);
+      } catch {
+        console.error('Failed to fetch data');
+      }
+    };
     fetchData();
   }, []);
-
-  const handleSave = async (status: 'draft' | 'submitted') => {
-    setMessage('');
-    
-    // Basic validation
-    if (!formData.week || !formData.project || !formData.completedTasks || !formData.plannedTasks) {
-      setMessage('Please fill in all required fields (Week, Project, Completed Tasks, Planned Tasks).');
-      return;
-    }
-
-    try {
-      const payload = { ...formData, status };
-      
-      if (editingId) {
-        await axios.put(`/employees/reports/${editingId}`, payload);
-        setMessage(`Report ${status === 'submitted' ? 'submitted' : 'saved as draft'} successfully!`);
-      } else {
-        await axios.post('/employees/reports', payload);
-        setMessage(`Report ${status === 'submitted' ? 'submitted' : 'saved as draft'} successfully!`);
-      }
-      
-      // Reset form if submitted, otherwise keep it for further editing
-      if (status === 'submitted') {
-        setFormData({
-          week: '', project: '', completedTasks: '', plannedTasks: '', blockers: '', hoursWorked: '', notes: ''
-        });
-        setEditingId(null);
-      }
-      
-      fetchData();
-    } catch {
-      setMessage(`Failed to save report.`);
-    }
-  };
-
-  const loadDraft = (report: Report) => {
-    setEditingId(report._id);
-    setFormData({
-      week: report.week,
-      project: typeof report.project === 'object' ? report.project._id : report.project,
-      completedTasks: report.completedTasks,
-      plannedTasks: report.plannedTasks,
-      blockers: report.blockers || '',
-      hoursWorked: report.hoursWorked || '',
-      notes: report.notes || ''
-    });
-    setMessage('');
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'submitted':
-        return <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Submitted</span>;
+        return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Submitted</span>;
       case 'draft':
-        return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">Draft</span>;
+        return <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Draft</span>;
       default:
-        return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">{status}</span>;
+        return <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{status}</span>;
     }
   };
 
-  const filteredReports = reports.filter(r => {
-    const statusMatch = filterStatus === 'all' || r.status === filterStatus;
-    const projectMatch = filterProject === 'all' || 
-      (typeof r.project === 'object' ? r.project._id === filterProject : r.project === filterProject);
-    return statusMatch && projectMatch;
-  });
+  const filteredAndSortedReports = reports
+    .filter(r => {
+      const statusMatch = filterStatus === 'all' || r.status === filterStatus;
+      const projectMatch = filterProject === 'all' || 
+        (typeof r.project === 'object' ? r.project._id === filterProject : r.project === filterProject);
+      return statusMatch && projectMatch;
+    })
+    .sort((a, b) => {
+      // Sort drafts to the top
+      if (a.status === 'draft' && b.status !== 'draft') return -1;
+      if (a.status !== 'draft' && b.status === 'draft') return 1;
+      
+      // Then sort by week (descending)
+      return b.week.localeCompare(a.week);
+    });
 
   return (
-    <main className="max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
-      
-      {/* Left Column: Report Form */}
-      <div className="lg:col-span-1">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              {editingId ? 'Edit Draft Report' : 'New Weekly Report'}
-            </h2>
-          </div>
-          
-          {message && (
-            <div className={`mb-4 p-3 rounded-lg text-sm ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-              {message}
-            </div>
-          )}
-
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Week *</label>
-                <input
-                  required
-                  type="week"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  value={formData.week}
-                  onChange={(e) => setFormData({...formData, week: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project *</label>
-                <select
-                  required
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
-                  value={formData.project as string}
-                  onChange={(e) => setFormData({...formData, project: e.target.value})}
-                >
-                  <option value="">Select a project</option>
-                  {projects.map(p => (
-                    <option key={p._id} value={p._id}>{p.projectName}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tasks Completed *</label>
-              <textarea
-                required
-                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                rows={3}
-                placeholder="What did you accomplish this week?"
-                value={formData.completedTasks}
-                onChange={(e) => setFormData({...formData, completedTasks: e.target.value})}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Planned for Next Week *</label>
-              <textarea
-                required
-                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                rows={3}
-                placeholder="What are your priorities for next week?"
-                value={formData.plannedTasks}
-                onChange={(e) => setFormData({...formData, plannedTasks: e.target.value})}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Blockers / Challenges</label>
-              <textarea
-                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                rows={2}
-                placeholder="Any issues blocking your progress?"
-                value={formData.blockers}
-                onChange={(e) => setFormData({...formData, blockers: e.target.value})}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Hours Worked</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  value={formData.hoursWorked}
-                  onChange={(e) => setFormData({...formData, hoursWorked: e.target.value === '' ? '' : Number(e.target.value)})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes / Links</label>
-                <input
-                  type="text"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Links to PRs, docs, etc."
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-4 pt-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => handleSave('draft')}
-                className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 p-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              >
-                <Save className="h-4 w-4" />
-                Save Draft
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSave('submitted')}
-                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white p-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                <Send className="h-4 w-4" />
-                Submit Report
-              </button>
-            </div>
-            
-            {editingId && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null);
-                  setFormData({ week: '', project: '', completedTasks: '', plannedTasks: '', blockers: '', hoursWorked: '', notes: '' });
-                }}
-                className="w-full text-sm text-gray-500 hover:text-gray-700 mt-2"
-              >
-                Cancel Editing
-              </button>
-            )}
-          </form>
+    <main className="max-w-7xl w-full mx-auto p-6 mt-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <FileText className="h-6 w-6 text-blue-600" />
+            My Report History
+          </h1>
+          <p className="text-gray-500 mt-1">View your past submissions and manage your drafts.</p>
         </div>
+        <button
+          onClick={() => navigate('/employee/submit')}
+          className="bg-black text-white px-5 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors shadow-sm"
+        >
+          + New Report
+        </button>
       </div>
 
-      {/* Right Column: Report History */}
-      <div className="lg:col-span-1">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white">
-            <h2 className="text-lg font-semibold text-gray-900">My Reports</h2>
-            <div className="flex items-center gap-4">
-              <select
-                className="text-sm p-1.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={filterProject}
-                onChange={(e) => setFilterProject(e.target.value)}
-              >
-                <option value="all">All Projects</option>
-                {projects.map(p => (
-                  <option key={p._id} value={p._id}>{p.projectName}</option>
-                ))}
-              </select>
-              <select
-                className="text-sm p-1.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Drafts</option>
-                <option value="submitted">Submitted</option>
-              </select>
-              <div className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
-                {filteredReports.length} Total
-              </div>
-            </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 flex flex-wrap justify-between items-center bg-gray-50 gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <select
+              className="text-sm p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm bg-white min-w-[150px]"
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+            >
+              <option value="all">All Projects</option>
+              {projects.map(p => (
+                <option key={p._id} value={p._id}>{p.projectName}</option>
+              ))}
+            </select>
+            <select
+              className="text-sm p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm bg-white min-w-[150px]"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as any)}
+            >
+              <option value="all">All Statuses</option>
+              <option value="draft">Drafts Only</option>
+              <option value="submitted">Submitted Only</option>
+            </select>
           </div>
-          
-          <div className="divide-y divide-gray-100 max-h-[700px] overflow-y-auto">
-            {filteredReports.map((report) => (
-              <div key={report._id} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      Week: {report.week}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      Project: {typeof report.project === 'object' ? report.project.projectName : report.project}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(report.status)}
-                    {report.status === 'draft' && (
-                      <button 
-                        onClick={() => loadDraft(report)}
-                        className="text-blue-600 hover:text-blue-800 p-1 transition-colors"
-                        title="Edit Draft"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+          <div className="bg-white border border-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-medium shadow-sm">
+            {filteredAndSortedReports.length} Reports Found
+          </div>
+        </div>
+        
+        <div className="p-6 bg-gray-50">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAndSortedReports.map((report) => (
+              <div 
+                key={report._id} 
+                onClick={() => setSelectedReport(report)}
+                className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer flex flex-col h-full"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Week {report.week}
+                  </h3>
+                  {getStatusBadge(report.status)}
                 </div>
                 
-                <div className="mt-4 space-y-3 text-sm">
-                  <div>
-                    <strong className="text-gray-700 block text-xs uppercase tracking-wider mb-1">Completed</strong>
-                    <p className="text-gray-600 bg-gray-50 p-2 rounded border border-gray-100">
-                      {report.completedTasks}
-                    </p>
-                  </div>
-                  <div>
-                    <strong className="text-gray-700 block text-xs uppercase tracking-wider mb-1">Planned</strong>
-                    <p className="text-gray-600 bg-gray-50 p-2 rounded border border-gray-100">
-                      {report.plannedTasks}
-                    </p>
-                  </div>
-                  {(report.blockers || report.hoursWorked) && (
-                    <div className="flex gap-4 pt-2">
-                      {report.hoursWorked && (
-                        <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded text-xs font-medium">
-                          {report.hoursWorked} Hours
-                        </div>
-                      )}
-                      {report.blockers && (
-                        <div className="bg-red-50 text-red-700 px-3 py-1 rounded text-xs font-medium">
-                          Blockers Reported
-                        </div>
-                      )}
-                    </div>
+                <p className="text-sm text-blue-600 font-medium mb-4">
+                  {typeof report.project === 'object' ? report.project.projectName : report.project}
+                </p>
+
+                <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                    Click to view details
+                  </span>
+                  {report.status === 'draft' && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/employee/submit', { state: { report } });
+                      }}
+                      className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors"
+                    >
+                      <Edit2 className="h-3 w-3" />
+                      Edit Draft
+                    </button>
                   )}
                 </div>
               </div>
             ))}
-            {filteredReports.length === 0 && (
-              <div className="p-8 text-center text-gray-500">
-                You haven't created any reports yet.
-              </div>
-            )}
           </div>
+
+          {filteredAndSortedReports.length === 0 && (
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
+                <FileText className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">No reports found</h3>
+              <p className="text-gray-500">
+                {reports.length === 0 
+                  ? "You haven't created any reports yet. Click 'New Report' to get started."
+                  : "Try adjusting your filters to see more results."}
+              </p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Modal for Report Details */}
+      {selectedReport && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center z-10">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  Week {selectedReport.week}
+                  {getStatusBadge(selectedReport.status)}
+                </h2>
+                <p className="text-blue-600 font-medium mt-1">
+                  Project: {typeof selectedReport.project === 'object' ? selectedReport.project.projectName : selectedReport.project}
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedReport(null)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-6 w-6 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-8">
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Completed Tasks</h4>
+                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    {selectedReport.completedTasks || 'No tasks listed.'}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Planned for Next Week</h4>
+                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    {selectedReport.plannedTasks || 'No tasks listed.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {selectedReport.blockers && (
+                  <div>
+                    <h4 className="text-sm font-bold text-red-900 uppercase tracking-wider mb-3">Blockers</h4>
+                    <div className="bg-red-50 rounded-xl p-4 border border-red-100 text-red-800">
+                      <p className="whitespace-pre-wrap text-sm">{selectedReport.blockers}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {selectedReport.notes && (
+                  <div>
+                    <h4 className="text-sm font-bold text-yellow-900 uppercase tracking-wider mb-3">Notes & Links</h4>
+                    <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-100 text-yellow-800">
+                      <p className="whitespace-pre-wrap text-sm">{selectedReport.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {selectedReport.hoursWorked && (
+                <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium">
+                  <span className="text-blue-500">⏱</span>
+                  {selectedReport.hoursWorked} Hours Logged
+                </div>
+              )}
+            </div>
+            
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-100 p-6 flex justify-end">
+              <button 
+                onClick={() => setSelectedReport(null)}
+                className="px-6 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
