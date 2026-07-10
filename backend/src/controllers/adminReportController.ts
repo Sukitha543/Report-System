@@ -25,8 +25,7 @@ export const getReports = async (req: Request, res: Response): Promise<void> => 
 
     const query: any = {};
     
-    // Explicitly check that we only include submitted reports for admins, or maybe allow them to see drafts?
-    // Usually admins only see submitted/late reports. 
+    // Explicitly check that we only include submitted/late reports in the DB
     query.status = { $in: ['submitted', 'late'] };
 
     if (employeeId && employeeId !== 'all') {
@@ -36,10 +35,20 @@ export const getReports = async (req: Request, res: Response): Promise<void> => 
       query.project = projectId;
     }
 
+    let isSingleWeekSearch = false;
+    let targetSunday: Date | null = null;
+    let isPastDeadline = false;
+
     if (startWeek || endWeek) {
       query.week = {};
       if (startWeek) query.week.$gte = startWeek;
       if (endWeek) query.week.$lte = endWeek;
+
+      if (startWeek === endWeek && typeof startWeek === 'string') {
+        isSingleWeekSearch = true;
+        targetSunday = getSundayOfISOWeek(startWeek);
+        isPastDeadline = Date.now() > targetSunday.getTime();
+      }
     }
 
     const reports = await Report.find(query)
@@ -50,7 +59,54 @@ export const getReports = async (req: Request, res: Response): Promise<void> => 
       .populate('project', 'projectName')
       .sort({ week: -1, createdAt: -1 });
 
-    res.json(reports);
+    const finalReports: any[] = reports.map(r => {
+      const rep = r.toObject();
+      const sunday = getSundayOfISOWeek(rep.week);
+      if (rep.status === 'submitted' && rep.submittedAt && new Date(rep.submittedAt) > sunday) {
+        rep.status = 'late';
+      }
+      return rep;
+    });
+
+    // If searching for a specific week, append pending/late unsubmitted reports based on assignments
+    if (isSingleWeekSearch) {
+      const assignmentQuery: any = {};
+      if (employeeId && employeeId !== 'all') assignmentQuery.employee = employeeId;
+      if (projectId && projectId !== 'all') assignmentQuery.project = projectId;
+
+      const assignments = await ProjectAssignment.find(assignmentQuery)
+        .populate({
+          path: 'employee',
+          populate: { path: 'user', select: 'email' }
+        })
+        .populate('project', 'projectName');
+
+      for (const assignment of assignments) {
+        // Check if there's already a submitted report for this assignment in finalReports
+        const hasReport = finalReports.find(
+          r => r.employee._id.toString() === assignment.employee._id.toString() &&
+               r.project._id.toString() === assignment.project._id.toString()
+        );
+
+        if (!hasReport) {
+          finalReports.push({
+            _id: `pending-${assignment.employee._id}-${assignment.project._id}`,
+            week: startWeek,
+            employee: assignment.employee,
+            project: assignment.project,
+            completedTasks: 'No report submitted yet.',
+            plannedTasks: '-',
+            blockers: '-',
+            hoursWorked: 0,
+            notes: '',
+            status: isPastDeadline ? 'late' : 'pending',
+            submittedAt: null
+          });
+        }
+      }
+    }
+
+    res.json(finalReports);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error });
   }
@@ -68,50 +124,49 @@ export const getTeamStatus = async (req: Request, res: Response): Promise<void> 
     const targetSunday = getSundayOfISOWeek(week);
     const isPastDeadline = Date.now() > targetSunday.getTime();
 
-    // Only get employees that are assigned to at least one project
-    const assignedEmployeeIds = await ProjectAssignment.find().distinct('employee');
-    const employees = await Employee.find({ _id: { $in: assignedEmployeeIds } }).populate('user', 'email');
+    // Get all assignments and populate employee and project
+    const assignments = await ProjectAssignment.find()
+      .populate({
+        path: 'employee',
+        populate: { path: 'user', select: 'email' }
+      })
+      .populate('project', 'projectName');
     
     const reports = await Report.find({ week }).populate('project', 'projectName');
 
-    const statusList = employees.map(emp => {
-      // Allow for multiple reports per week? Usually 1 per project or just 1 overall.
-      // In this system they might submit multiple per week if they work on multiple projects.
-      // But we just check if they submitted *any* report for the week to mark them as completed/late.
-      // We will grab all their reports for the week.
-      const empReports = reports.filter(r => r.employee.toString() === emp._id.toString());
-      
-      // Filter out drafts to see if they actually submitted anything
-      const submittedReports = empReports.filter(r => r.status === 'submitted' || r.status === 'late');
+    const statusList = assignments.map(assignment => {
+      // Find report for this specific employee AND project
+      const empProjectReport = reports.find(
+        r => r.employee.toString() === assignment.employee._id.toString() &&
+             r.project._id.toString() === assignment.project._id.toString()
+      );
       
       let computedStatus = 'pending';
-      let relatedReports = empReports;
+      let relatedReports = empProjectReport ? [empProjectReport] : [];
 
-      if (submittedReports.length > 0) {
-        // They submitted at least one report. Is it late?
-        // We'll check the earliest submission or latest. Let's just check if ANY were submitted before deadline.
-        // Actually, just check if the first one was late.
-        const firstSubmitted = submittedReports[0];
-        
-        // Use the saved status if it's already 'late', otherwise compute
-        if (firstSubmitted!.status === 'late' || (firstSubmitted!.submittedAt && firstSubmitted!.submittedAt > targetSunday)) {
+      if (empProjectReport && (empProjectReport.status === 'submitted' || empProjectReport.status === 'late')) {
+        // They submitted a report for this project. Is it late?
+        if (empProjectReport.status === 'late' || (empProjectReport.submittedAt && empProjectReport.submittedAt > targetSunday)) {
           computedStatus = 'late';
         } else {
           computedStatus = 'submitted';
         }
       } else {
-        // No submitted reports (either no reports at all, or only drafts)
+        // No submitted report for this project
         if (isPastDeadline) {
-          computedStatus = 'late'; // They missed the deadline completely
+          computedStatus = 'late'; 
         } else {
-          computedStatus = 'pending'; // They still have time
+          computedStatus = 'pending'; 
         }
       }
 
       return {
-        employee: emp,
+        // We use a unique ID for React mapping (employee + project)
+        _id: `${assignment.employee._id}-${assignment.project._id}`,
+        employee: assignment.employee,
+        project: assignment.project,
         status: computedStatus,
-        reports: empReports // Pass back all reports (including drafts maybe, but admin might not need to read drafts, just know they exist)
+        reports: relatedReports
       };
     });
 

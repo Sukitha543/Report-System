@@ -33,7 +33,9 @@ interface Report {
 }
 
 interface TeamStatus {
+  _id: string;
   employee: Employee;
+  project: Project;
   status: 'pending' | 'late' | 'submitted';
   reports: Report[];
 }
@@ -181,41 +183,37 @@ const TeamReports = () => {
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-sm border-b border-gray-200">
                   <th className="p-4 font-medium">Employee</th>
+                  <th className="p-4 font-medium">Project</th>
                   <th className="p-4 font-medium">Status</th>
-                  <th className="p-4 font-medium">Reports Submitted</th>
                   <th className="p-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {teamStatus.map((item) => {
-                  const hasSubmitted = item.reports.filter(r => r.status === 'submitted' || r.status === 'late');
+                  const hasSubmitted = item.status === 'submitted' || item.status === 'late';
                   return (
-                    <tr key={item.employee._id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4">
                         <div className="font-medium text-gray-900">
                           {item.employee.firstName} {item.employee.lastName}
                         </div>
                         <div className="text-xs text-gray-500">{item.employee.employeeID}</div>
                       </td>
+                      <td className="p-4 text-gray-700">
+                        {item.project.projectName}
+                      </td>
                       <td className="p-4">
                         {getStatusBadge(item.status)}
                       </td>
-                      <td className="p-4 text-sm text-gray-600">
-                        {hasSubmitted.length > 0 ? (
-                          <span>{hasSubmitted.length} report(s)</span>
-                        ) : (
-                          <span className="text-gray-400">None</span>
-                        )}
-                      </td>
                       <td className="p-4 text-right">
-                        {hasSubmitted.length > 0 && (
+                        {hasSubmitted && (
                           <button 
                             onClick={() => {
                               navigate(`/admin/reports/employee/${item.employee._id}?week=${trackerWeek}`);
                             }}
                             className="text-sm text-blue-600 font-medium hover:text-blue-800 transition-colors"
                           >
-                            View Reports
+                            View Report
                           </button>
                         )}
                       </td>
