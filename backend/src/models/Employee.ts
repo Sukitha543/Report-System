@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IEmployee extends Document {
-  user: mongoose.Types.ObjectId;
+  employeeID: string;
+  user?: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;
   address?: string;
@@ -10,7 +11,8 @@ export interface IEmployee extends Document {
 }
 
 const EmployeeSchema: Schema = new Schema({
-  user: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  employeeID: { type: String, required: true, unique: true },
+  user: { type: Schema.Types.ObjectId, ref: 'User' },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   address: { type: String },
