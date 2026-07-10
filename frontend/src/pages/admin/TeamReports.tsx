@@ -5,7 +5,7 @@ import { Users, Filter, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Employee {
   _id: string;
-  EmployeeID: string;
+  employeeID: string;
   firstName: string;
   lastName: string;
   user: {
@@ -195,7 +195,7 @@ const TeamReports = () => {
                         <div className="font-medium text-gray-900">
                           {item.employee.firstName} {item.employee.lastName}
                         </div>
-                        <div className="text-xs text-gray-500">{item.employee.EmployeeID}</div>
+                        <div className="text-xs text-gray-500">{item.employee.employeeID}</div>
                       </td>
                       <td className="p-4">
                         {getStatusBadge(item.status)}
@@ -248,7 +248,7 @@ const TeamReports = () => {
                   <option value="all">All Employees</option>
                   {employees.map(emp => (
                     <option key={emp._id} value={emp._id}>
-                      {emp.firstName} {emp.lastName} ({emp.EmployeeID})
+                      {emp.firstName} {emp.lastName} ({emp.employeeID})
                     </option>
                   ))}
                 </select>

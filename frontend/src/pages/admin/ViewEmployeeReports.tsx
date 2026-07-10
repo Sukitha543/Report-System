@@ -10,7 +10,7 @@ interface Report {
     _id: string;
     firstName: string;
     lastName: string;
-    EmployeeID: string;
+    employeeID: string;
   };
   project: {
     _id: string;

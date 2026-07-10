@@ -7,7 +7,7 @@ interface Employee {
   _id: string;
   firstName: string;
   lastName: string;
-  EmployeeID: string;
+  employeeID: string;
 }
 
 interface Project {
@@ -45,7 +45,7 @@ const ManageProjects = () => {
         _id: e._id,
         firstName: e.firstName, // Assuming Employee model has firstName/lastName
         lastName: e.lastName,
-        EmployeeID: e.EmployeeID
+        employeeID: e.employeeID
       })));
     } catch {
       console.error('Failed to fetch data');
@@ -169,7 +169,7 @@ const ManageProjects = () => {
                       checked={selectedEmployees.includes(emp._id)}
                       onChange={() => toggleEmployee(emp._id)}
                     />
-                    <span className="text-sm text-gray-700">{emp.firstName} {emp.lastName} ({emp.EmployeeID})</span>
+                    <span className="text-sm text-gray-700">{emp.firstName} {emp.lastName} ({emp.employeeID})</span>
                   </label>
                 ))}
                 {allEmployees.length === 0 && (
