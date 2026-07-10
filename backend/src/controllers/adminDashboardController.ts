@@ -78,6 +78,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
     const memberStatusMap: Record<string, { name: string; submitted: number; pending: number }> = {};
     
     assignments.forEach(a => {
+      if (!a.employee || !a.project) return;
       const empId = a.employee._id.toString();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const empName = `${(a.employee as any).firstName} ${(a.employee as any).lastName}`;
@@ -87,7 +88,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
       }
 
       const hasSubmitted = submittedCurrentWeek.find(
-        r => r.employee._id.toString() === empId && r.project._id.toString() === a.project._id.toString()
+        r => r.employee?._id?.toString() === empId && r.project?._id?.toString() === a.project._id.toString()
       );
 
       if (hasSubmitted) {

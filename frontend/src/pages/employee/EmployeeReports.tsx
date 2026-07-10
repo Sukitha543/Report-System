@@ -59,15 +59,15 @@ const EmployeeReports = () => {
   const filteredAndSortedReports = reports
     .filter(r => {
       const statusMatch = filterStatus === 'all' || r.status === filterStatus;
-      const projectMatch = filterProject === 'all' || 
-        (typeof r.project === 'object' ? r.project._id === filterProject : r.project === filterProject);
+      const projectMatch = filterProject === 'all' ||
+        (typeof r.project === 'object' && r.project !== null ? r.project._id === filterProject : r.project === filterProject);
       return statusMatch && projectMatch;
     })
     .sort((a, b) => {
       // Sort drafts to the top
       if (a.status === 'draft' && b.status !== 'draft') return -1;
       if (a.status !== 'draft' && b.status === 'draft') return 1;
-      
+
       // Then sort by week (descending)
       return b.week.localeCompare(a.week);
     });
@@ -84,7 +84,7 @@ const EmployeeReports = () => {
         </div>
         <button
           onClick={() => navigate('/employee/submit')}
-          className="bg-black text-white px-5 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors shadow-sm"
+          className="bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-emerald-600 transition-colors shadow-sm"
         >
           + New Report
         </button>
@@ -117,12 +117,12 @@ const EmployeeReports = () => {
             {filteredAndSortedReports.length} Reports Found
           </div>
         </div>
-        
+
         <div className="p-6 bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedReports.map((report) => (
-              <div 
-                key={report._id} 
+              <div
+                key={report._id}
                 onClick={() => setSelectedReport(report)}
                 className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer flex flex-col h-full"
               >
@@ -132,9 +132,9 @@ const EmployeeReports = () => {
                   </h3>
                   {getStatusBadge(report.status)}
                 </div>
-                
+
                 <p className="text-sm text-blue-600 font-medium mb-4">
-                  {typeof report.project === 'object' ? report.project.projectName : report.project}
+                  {typeof report.project === 'string' ? report.project : report.project?.projectName || 'Unknown Project'}
                 </p>
 
                 <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
@@ -142,7 +142,7 @@ const EmployeeReports = () => {
                     Click to view details
                   </span>
                   {report.status === 'draft' && (
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate('/employee/submit', { state: { report } });
@@ -165,7 +165,7 @@ const EmployeeReports = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-1">No reports found</h3>
               <p className="text-gray-500">
-                {reports.length === 0 
+                {reports.length === 0
                   ? "You haven't created any reports yet. Click 'New Report' to get started."
                   : "Try adjusting your filters to see more results."}
               </p>
@@ -185,17 +185,17 @@ const EmployeeReports = () => {
                   {getStatusBadge(selectedReport.status)}
                 </h2>
                 <p className="text-blue-600 font-medium mt-1">
-                  Project: {typeof selectedReport.project === 'object' ? selectedReport.project.projectName : selectedReport.project}
+                  Project: {typeof selectedReport.project === 'string' ? selectedReport.project : selectedReport.project?.projectName || 'Unknown Project'}
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedReport(null)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X className="h-6 w-6 text-gray-500" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-8">
               <div>
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Completed Tasks</h4>
@@ -224,7 +224,7 @@ const EmployeeReports = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {selectedReport.notes && (
                   <div>
                     <h4 className="text-sm font-bold text-yellow-900 uppercase tracking-wider mb-3">Notes & Links</h4>
@@ -242,9 +242,9 @@ const EmployeeReports = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="sticky bottom-0 bg-gray-50 border-t border-gray-100 p-6 flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedReport(null)}
                 className="px-6 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors"
               >
