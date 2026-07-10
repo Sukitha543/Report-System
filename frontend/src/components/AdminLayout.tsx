@@ -34,6 +34,14 @@ const AdminLayout = () => {
               >
                 Projects
               </NavLink>
+              <NavLink 
+                to="/admin/reports" 
+                className={({ isActive }) => 
+                  `transition-colors ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-gray-200'}`
+                }
+              >
+                Team Reports
+              </NavLink>
             </div>
           </div>
 

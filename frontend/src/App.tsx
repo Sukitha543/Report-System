@@ -11,6 +11,8 @@ import AdminLayout from './components/AdminLayout';
 import EmployeeLayout from './components/EmployeeLayout';
 import EmployeeReports from './pages/employee/EmployeeReports';
 import ManageProjects from './pages/admin/ManageProjects';
+import TeamReports from './pages/admin/TeamReports';
+import ViewEmployeeReports from './pages/admin/ViewEmployeeReports';
 
 const ProtectedRoute = ({ children, allowedRole }: { children: ReactNode, allowedRole: 'admin' | 'employee' }) => {
   const { user, loading } = useAuth();
@@ -46,15 +48,17 @@ const App = () => {
           >
             <Route index element={<AdminDashboard />} />
             <Route path="projects" element={<ManageProjects />} />
+            <Route path="reports" element={<TeamReports />} />
+            <Route path="reports/employee/:employeeId" element={<ViewEmployeeReports />} />
           </Route>
 
-          <Route 
-            path="/employee" 
+          <Route
+            path="/employee"
             element={
               <ProtectedRoute allowedRole="employee">
                 <EmployeeLayout />
               </ProtectedRoute>
-            } 
+            }
           >
             <Route index element={<EmployeeDashboard />} />
             <Route path="reports" element={<EmployeeReports />} />

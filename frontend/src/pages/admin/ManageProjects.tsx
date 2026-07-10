@@ -1,7 +1,14 @@
 import type { FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FolderKanban, PlusCircle, Trash2, Edit2, X } from 'lucide-react';
+import { FolderKanban, PlusCircle, Trash2, Edit2, X, Users } from 'lucide-react';
+
+interface Employee {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  EmployeeID: string;
+}
 
 interface Project {
   _id: string;
@@ -13,42 +20,59 @@ interface Project {
     firstName: string;
     lastName: string;
   };
+  employees: string[];
 }
 
 const ManageProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
+  
   const [formData, setFormData] = useState({ projectName: '', description: '' });
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  
   const [message, setMessage] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const fetchProjects = async () => {
+  const fetchData = async () => {
     try {
-      const res = await axios.get('/admin/projects');
-      setProjects(res.data);
+      const [projRes, empRes] = await Promise.all([
+        axios.get('/admin/projects'),
+        axios.get('/admin/employees')
+      ]);
+      setProjects(projRes.data);
+      // Map empRes so we have the same format as TeamReports
+      setAllEmployees(empRes.data.map((e: any) => ({
+        _id: e._id,
+        firstName: e.firstName, // Assuming Employee model has firstName/lastName
+        lastName: e.lastName,
+        EmployeeID: e.EmployeeID
+      })));
     } catch {
-      console.error('Failed to fetch projects');
+      console.error('Failed to fetch data');
     }
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProjects();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setMessage('');
     try {
+      const payload = { ...formData, employeeIds: selectedEmployees };
+      
       if (editingId) {
-        await axios.put(`/admin/projects/${editingId}`, formData);
+        await axios.put(`/admin/projects/${editingId}`, payload);
         setMessage('Project updated successfully!');
       } else {
-        await axios.post('/admin/projects', formData);
+        await axios.post('/admin/projects', payload);
         setMessage('Project created successfully!');
       }
       setFormData({ projectName: '', description: '' });
+      setSelectedEmployees([]);
       setEditingId(null);
-      fetchProjects();
+      fetchData();
     } catch {
       setMessage(`Failed to ${editingId ? 'update' : 'create'} project.`);
     }
@@ -57,12 +81,14 @@ const ManageProjects = () => {
   const handleEdit = (project: Project) => {
     setEditingId(project._id);
     setFormData({ projectName: project.projectName, description: project.description || '' });
+    setSelectedEmployees(project.employees || []);
     setMessage('');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setFormData({ projectName: '', description: '' });
+    setSelectedEmployees([]);
     setMessage('');
   };
 
@@ -70,10 +96,16 @@ const ManageProjects = () => {
     if (!window.confirm('Are you sure you want to delete this project?')) return;
     try {
       await axios.delete(`/admin/projects/${id}`);
-      fetchProjects();
+      fetchData();
     } catch {
       alert('Failed to delete project.');
     }
+  };
+
+  const toggleEmployee = (empId: string) => {
+    setSelectedEmployees(prev => 
+      prev.includes(empId) ? prev.filter(id => id !== empId) : [...prev, empId]
+    );
   };
 
   return (
@@ -118,15 +150,38 @@ const ManageProjects = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <textarea
                 className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black transition-colors"
-                rows={4}
+                rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <Users className="h-4 w-4" /> Assign Employees
+              </label>
+              <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg bg-gray-50 p-2 space-y-1">
+                {allEmployees.map(emp => (
+                  <label key={emp._id} className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer transition-colors">
+                    <input 
+                      type="checkbox"
+                      className="rounded border-gray-300 text-black focus:ring-black"
+                      checked={selectedEmployees.includes(emp._id)}
+                      onChange={() => toggleEmployee(emp._id)}
+                    />
+                    <span className="text-sm text-gray-700">{emp.firstName} {emp.lastName} ({emp.EmployeeID})</span>
+                  </label>
+                ))}
+                {allEmployees.length === 0 && (
+                  <div className="text-sm text-gray-500 p-2 text-center">No employees found.</div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">{selectedEmployees.length} employee(s) selected.</p>
+            </div>
+
             <button
               type="submit"
-              className={`w-full text-white p-3 rounded-lg font-medium transition-colors mt-2 ${
+              className={`w-full text-white p-3 rounded-lg font-medium transition-colors mt-4 ${
                 editingId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800'
               }`}
             >
@@ -154,7 +209,7 @@ const ManageProjects = () => {
               <thead className="bg-gray-50 text-gray-600">
                 <tr>
                   <th className="px-6 py-4 font-medium">Project Name</th>
-                  <th className="px-6 py-4 font-medium hidden sm:table-cell">Description</th>
+                  <th className="px-6 py-4 font-medium hidden sm:table-cell">Team Size</th>
                   <th className="px-6 py-4 font-medium">Created On</th>
                   <th className="px-6 py-4 font-medium text-right">Actions</th>
                 </tr>
@@ -166,8 +221,9 @@ const ManageProjects = () => {
                       {proj.projectName}
                     </td>
                     <td className="px-6 py-4 text-gray-500 hidden sm:table-cell">
-                      <div className="max-w-[200px] truncate" title={proj.description}>
-                        {proj.description || '-'}
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {proj.employees ? proj.employees.length : 0} members
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap">

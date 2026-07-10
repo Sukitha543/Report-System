@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { Report, Employee, Project } from '../models/index.js';
+import { Report, Employee, Project, ProjectAssignment } from '../models/index.js';
 
 export const createReport = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -101,9 +101,18 @@ export const updateReport = async (req: Request, res: Response): Promise<void> =
 
 export const getProjects = async (req: Request, res: Response): Promise<void> => {
   try {
-    // For now, return all projects so the employee can select from them.
-    // Future enhancement: query ProjectAssignment model to restrict to assigned projects.
-    const projects = await Project.find().sort({ projectName: 1 });
+    const userId = req.session.userId as string;
+    const employee = await Employee.findOne({ user: userId });
+    
+    if (!employee) {
+      res.status(403).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const assignments = await ProjectAssignment.find({ employee: employee._id });
+    const projectIds = assignments.map(a => a.project);
+
+    const projects = await Project.find({ _id: { $in: projectIds } }).sort({ projectName: 1 });
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
