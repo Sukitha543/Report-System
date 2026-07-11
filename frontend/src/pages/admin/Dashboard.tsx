@@ -146,7 +146,7 @@ const Dashboard = () => {
                   dataKey="hours"
                   nameKey="projectName"
                 >
-                  {stats.workloadDistribution.map((entry, index) => (
+                  {stats.workloadDistribution.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

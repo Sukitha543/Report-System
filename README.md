@@ -101,7 +101,9 @@ Before you begin, ensure you have met the following requirements:
    ```bash
    cd backend
    ```
-2. Ensure you have your `.env` file configured in the backend folder with the necessary variables (e.g., database credentials).
+2. Ensure you have your `.env` file configured in the backend folder with the necessary variables given in the follwing link
+`https://docs.google.com/document/d/17agZpP8l-2MVXlPBbuBG0h2wB4IIXGbMFeuUav9wUmc/edit?usp=sharing`
+
 3. Start the backend development server:
    ```bash
    npm run dev
