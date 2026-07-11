@@ -27,6 +27,9 @@ frontend/
 ├── 📁 public/             # Public assets
 ├── 📁 src/
 │   ├── 🖼️ assets/         # Static assets like images
+│   ├── 🧩 components/     # Reusable UI components
+│   ├── 🗃️ context/        # React context (State management)
+│   ├── 📄 pages/          # Application pages (Admin/Employee views)
 │   ├── 🎨 App.css         # App specific styles
 │   ├── ⚛️ App.tsx         # Main application component
 │   ├── 🎨 index.css       # Global styles
@@ -43,6 +46,11 @@ frontend/
 backend/
 ├── 📁 src/
 │   ├── ⚙️ config/         # Configuration files (e.g., database connection)
+│   ├── 🎮 controllers/    # Request handlers & business logic
+│   ├── 🛡️ middleware/     # Custom middleware (Auth, Roles)
+│   ├── 🏗️ models/         # Mongoose schemas & database models
+│   ├── 🛣️ routes/         # API endpoint definitions
+│   ├── 🌱 seed.ts         # Database seeding script
 │   └── 🚀 server.ts       # Backend entry point
 ├── 🔐 .env                # Environment variables
 ├── 📦 package.json        # Backend dependencies and scripts
